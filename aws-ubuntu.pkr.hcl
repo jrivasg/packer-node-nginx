@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     amazon = {
-      version = ">= 0.0.2"
+      version = ">= 1.2.4"
       source  = "github.com/hashicorp/amazon"
     }
   }
@@ -13,7 +13,7 @@ source "amazon-ebs" "ubuntu" {
   region        = "eu-central-1"
   source_ami_filter {
     filters = {
-      name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+      name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*",
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }
@@ -24,16 +24,10 @@ source "amazon-ebs" "ubuntu" {
 }
 
 build {
-  name = "learn-packer"
+  name = "node-nginx"
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
-
-  /* post-processor "shell-local" {     
-    inline = [
-    "aws ec2 run-instances --image-id {{.ImageId}} --count 1 --instance-type t2.micro --key-name packer-keys --security-group-ids sg-03b79f83ba62f42e7"
-    ]    
-  } */
 
   provisioner "shell" {
     inline = [
@@ -50,6 +44,10 @@ build {
   provisioner "shell" {
     script = "./install.sh"
   }
+
+  post-processor "manifest" {}
+
+  provisioner "shell-local" {
+    script = "./launch_instance.sh"
+  }
 }
-
-
